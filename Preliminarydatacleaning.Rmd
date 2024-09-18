@@ -1,0 +1,105 @@
+---
+title: "DATASET PREP OIM454"
+author: "Elizabeth Edminster"
+date: "2024-09-18"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+df <- read.csv("C:/Users/lized/Downloads/pls_fy2022_csv/PLS_FY2022 PUD_CSV/PLS_FY22_AE_pud22i.csv")
+```
+
+## Quantitative variable summary
+The following results show the summary statistics of all quantitative variables (note: certain variables like zip show summary statistics, but these are not relevant for analysis in this way)
+Number of records(before cleaning) = 9,248
+Number of columns(before cleaning) = 192
+```{r summarystats}
+q4 <- data.frame(unclass(summary(df)), check.names = FALSE, stringsAsFactors = FALSE)
+q4 <-q4[ , colSums(is.na(q4)) == 0]
+print(colnames(df))
+```
+
+## Our data chosen
+      Column descriptions
+
+**general info**      
+  LIBNAME: Name of library
+  STABR: State
+  C_LEGBAS: Legal Basis Code
+CC–City/County
+CI–Municipal Government (city, town, or village)
+CO–County/Parish
+LD–Library District
+MJ–Multi-jurisdictional
+NL–Native American Tribal Government
+NP–Non-profit Association or Agency
+SD–School District
+OT–Other
+  POPU_LSA: Population of the legal service area (population group that the library caters to)
+  HRS_OPEN: Total annual public service hours for all service outlets
+
+**locations & employees**
+  CENTLIB: Number of central libraries
+  BRANLIB: Number of branch libraries
+  BKMOB: Number of bookmobiles
+  MASTER: Number of full-time librarians with masters degrees in library science
+  LIBRARIA: Number of full-time librarians.
+
+**revenue**
+  TOTINCM: *Total operating revenue* (DO NOT include revenue for major capital expenditures, contributions to endowments, revenue passed through to another agency (e.g., fines), or funds unspent in the previous fiscal year (e.g., carryover)). This is revenue given by federal, state, & local governments, monetary gifts and donations received in the current year, interest, library fines, fees for library services, etc.
+  CAP_REV: *Total capital revenue* (revenue to be used for fixed cost items (funds
+received for (a) site acquisition; (b) new buildings; (c) additions to or renovation        of library buildings; (d) furnishings, equipment, and initial collections (print,           nonprint, and electronic) for new buildings, building additions, or building                renovations; (e) computer hardware and software used to support library operations, to      link to networks, or to run information products; (f) new vehicles; and (g) other           one-time major projects.))
+
+**operating expenditures**
+  STAFFEXP: Total operating salaries & benefits cost for employees
+  PRMATEXP: Total operating cost for print materials
+  ELMATEXP: Total operating cost for electronic materials
+  OTHMATEX: Total operating cost for other materials
+  OTHOPEXP: Total operating cost for other expenditures not included in salaries, benefits, or materials
+  
+**capital expenditures**
+  CAPITAL: Total capital expenditures
+
+**collection**
+  BKVOL: Print book collection (including duplicates)
+  EBOOK: EBook licencing collection (include duplicates)
+  VIDEO_PH: Physical video units (including duplicates)
+  AUDIO_PH: Physical audio units (including duplicates)
+  VIDEO_DL: Downloadable video units (including duplicates)
+  AUDIO_DL: Downloadable audio units (including duplicates)
+  OTHPHYS: Physical items aside from books, video, & audio (art supplies, cooking supplies, tools, etc.)
+  
+**metrics**
+  VISITS: total persons entering the library per year (estimated or counted)
+  REGBOR: total registered users
+  ELMATCIR: Total use of Electronic materials
+  PHYSCIR: Total use of Physical materials
+  KIDCIRCL: Total use of Childrens materials, electronic or not.
+  PITUSR: Total use of internet-connected computers
+  WEBVISIT: Total times the website of the library has been visited
+  
+**inter-library relations**
+  LOANTO: quantity of library materials provided to other libraries
+  LOANFM: quantity of library materials recieved from other libraries
+  
+**synchronous program sessions**
+  K0_5PRO: Number of Synchronous Program Sessions Targeted at Children Ages 0-5
+  K6_11PRO: Number of Synchronous Program Sessions Targeted at Children Ages 6-11
+  YAPRO: Number of Synchronous Program Sessions Targeted at Children Ages 12-18
+  ADULTPRO: Number of Synchronous Program Sessions Targeted at Children Ages 19 and older
+  TOTATTEN: Total attendance at Synchronous Programs
+
+```{r selectingourdata}
+ourdf <- df %>% select(LIBNAME, STABR, C_LEGBAS, POPU_LSA, CENTLIB, BRANLIB, BKMOB, MASTER, LIBRARIA, TOTINCM, CAP_REV, STAFFEXP, PRMATEXP, ELMATEXP, OTHMATEX, OTHOPEXP, CAPITAL, BKVOL, EBOOK, VIDEO_PH, AUDIO_PH, VIDEO_DL, AUDIO_DL, OTHPHYS, VISITS, REGBOR, ELMATCIR, PHYSCIR, KIDCIRCL, PITUSR, WEBVISIT, LOANTO, LOANFM, K0_5PRO, K6_11PRO, YAPRO, ADULTPRO, TOTATTEN)
+```
+
+## Our data cleaned
+This section takes out missing values present in the data in order to make sure the results are reasonable & accurate. 
+Ncols: 192 -> 38
+Nrow: 9248 -> 4955
+```{r cleaningdata}
+ourdfcleaned <- ourdf %>%
+  filter(!if_any(everything(), ~ . %in% c(-1, -3, -9)))
+```

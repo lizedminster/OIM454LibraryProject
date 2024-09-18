@@ -18,7 +18,6 @@ Number of columns(before cleaning) = 192
 ```{r summarystats}
 q4 <- data.frame(unclass(summary(df)), check.names = FALSE, stringsAsFactors = FALSE)
 q4 <-q4[ , colSums(is.na(q4)) == 0]
-print(colnames(df))
 ```
 
 ## Our data chosen
@@ -95,11 +94,44 @@ received for (a) site acquisition; (b) new buildings; (c) additions to or renova
 ourdf <- df %>% select(LIBNAME, STABR, C_LEGBAS, POPU_LSA, CENTLIB, BRANLIB, BKMOB, MASTER, LIBRARIA, TOTINCM, CAP_REV, STAFFEXP, PRMATEXP, ELMATEXP, OTHMATEX, OTHOPEXP, CAPITAL, BKVOL, EBOOK, VIDEO_PH, AUDIO_PH, VIDEO_DL, AUDIO_DL, OTHPHYS, VISITS, REGBOR, ELMATCIR, PHYSCIR, KIDCIRCL, PITUSR, WEBVISIT, LOANTO, LOANFM, K0_5PRO, K6_11PRO, YAPRO, ADULTPRO, TOTATTEN)
 ```
 
-## Our data cleaned
+## Our data agressively cleaned
 This section takes out missing values present in the data in order to make sure the results are reasonable & accurate. 
 Ncols: 192 -> 38
 Nrow: 9248 -> 4955
 ```{r cleaningdata}
 ourdfcleaned <- ourdf %>%
+  filter(!if_any(everything(), ~ . %in% c(-1, -3, -9)))
+```
+
+## Identifying problem columns
+This section determines which columns have the most missing values so that we can determine if removing these columns is worth or not worth losing data points that don't have these values.
+
+WEBVISIT & OTHPHYS will be removed because they had reasonably high levels of missing values and we had medium to low interest in these metrics. 
+
+OTHOPEXP and STAFFEXP will be removed because they had significantly high levels of missing values even though we had reasonable interest in these metrics
+
+K0_5PRO, K6_11PRO, YAPRO, ADULTPRO, and TOTATTEN will be removed because about 5% of libraries do not have these synchronous programs. Further research could be done comparing libraries that have these programs with libraries that dont to determine their effect, but for this research, ~500 library listings is too many to lose. 
+```{r problemcols}
+counts <- numeric(ncol(ourdf))
+
+for (i in 1:ncol(ourdf)) {
+  counts[i] <- sum(ourdf[[i]] %in% c(-1, -3, -9))
+}
+
+columnslevelofdifficulty <- data.frame(Column = colnames(ourdf), Count = counts)
+columnslevelofdifficulty <- columnslevelofdifficulty %>% arrange(desc(Count))
+head(columnslevelofdifficulty)
+```
+
+## Remaking a cleaned dataframe
+
+The new dataframe created does not include K0_5PRO, K6_11PRO, YAPRO, ADULTPRO, TOTATTEN, WEBVISIT, OTHPHYS, OTHOPEXP, and STAFFEXP.
+
+Ncols: 192 -> 38 -> 29
+Nrow: 9248 -> 4955 -> 9161
+```{r}
+ourdf2 <- ourdf %>% select(-c(K0_5PRO, K6_11PRO, YAPRO, ADULTPRO, TOTATTEN, WEBVISIT, OTHPHYS, OTHOPEXP, STAFFEXP))
+
+ourdfcleaned2 <- ourdf2 %>%
   filter(!if_any(everything(), ~ . %in% c(-1, -3, -9)))
 ```

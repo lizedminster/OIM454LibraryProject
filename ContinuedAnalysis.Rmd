@@ -1,0 +1,134 @@
+---
+title: "DATASET ANALYSIS"
+author: "Elizabeth Edminster"
+date: "2024-10-24"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+df <- read.csv("CleanedDf.csv")
+```
+
+## Summary of Data
+      Column descriptions
+
+**general info**      
+  LIBNAME: Name of library
+  STABR: State
+  C_LEGBAS: Legal Basis Code
+CC–City/County
+CI–Municipal Government (city, town, or village)
+CO–County/Parish
+LD–Library District
+MJ–Multi-jurisdictional
+NL–Native American Tribal Government
+NP–Non-profit Association or Agency
+SD–School District
+OT–Other
+  POPU_LSA: Population of the legal service area (population group that the library caters to)
+
+**locations & employees**
+  CENTLIB: Number of central libraries
+  BRANLIB: Number of branch libraries
+  BKMOB: Number of bookmobiles
+  MASTER: Number of full-time librarians with masters degrees in library science
+  LIBRARIA: Number of full-time librarians.
+
+**revenue**
+  TOTINCM: *Total operating revenue* (DO NOT include revenue for major capital expenditures, contributions to endowments, revenue passed through to another agency (e.g., fines), or funds unspent in the previous fiscal year (e.g., carryover)). This is revenue given by federal, state, & local governments, monetary gifts and donations received in the current year, interest, library fines, fees for library services, etc.
+  CAP_REV: *Total capital revenue* (revenue to be used for fixed cost items (funds
+received for (a) site acquisition; (b) new buildings; (c) additions to or renovation        of library buildings; (d) furnishings, equipment, and initial collections (print,           nonprint, and electronic) for new buildings, building additions, or building                renovations; (e) computer hardware and software used to support library operations, to      link to networks, or to run information products; (f) new vehicles; and (g) other           one-time major projects.))
+
+**operating expenditures**
+  PRMATEXP: Total operating cost for print materials
+  ELMATEXP: Total operating cost for electronic materials
+  OTHMATEX: Total operating cost for other materials
+
+**capital expenditures**
+  CAPITAL: Total capital expenditures
+
+**collection**
+  BKVOL: Print book collection (including duplicates)
+  EBOOK: EBook licencing collection (include duplicates)
+  VIDEO_PH: Physical video units (including duplicates)
+  AUDIO_PH: Physical audio units (including duplicates)
+  VIDEO_DL: Downloadable video units (including duplicates)
+  AUDIO_DL: Downloadable audio units (including duplicates)
+ 
+**metrics**
+  VISITS: total persons entering the library per year (estimated or counted)
+  REGBOR: total registered users
+  ELMATCIR: Total use of Electronic materials
+  PHYSCIR: Total use of Physical materials
+  KIDCIRCL: Total use of Childrens materials, electronic or not.
+  PITUSR: Total use of internet-connected computers
+
+**inter-library relations**
+  LOANTO: quantity of library materials provided to other libraries
+  LOANFM: quantity of library materials recieved from other libraries
+
+```{r summary}
+summary(df)
+```
+
+```{r}
+head(df)
+```
+
+```{r}
+ncol(df)
+nrow(df)
+```
+##Binning
+
+In order to compare libraries of different size categories more easily, I decided to bin them (turn them into a categorical variable).
+
+This is the preliminary distribution of the libraries
+```{r}
+POPU_LSA_BoxPlot <- boxplot(df$POPU_LSA)
+POPU_LSA_BoxPlot
+```
+I binned the libraries into 10 groups of a bit less than 100 libraries each. 
+```{r}
+df <- df %>%
+  mutate(limit = ntile(POPU_LSA, 10)) %>% 
+  mutate(limitMarker = case_when(
+    limit == 10 ~ "Up90",
+    limit == 9 ~ "80to90",
+    limit == 8 ~ "70to80",
+    limit == 7 ~ "60to70",
+    limit == 6 ~ "50to60",
+    limit == 5 ~ "40to50",
+    limit == 4 ~ "30to40",
+    limit == 3 ~ "20to30",
+    limit == 2 ~ "10to20",
+    limit == 1 ~ "Down10"
+  ))
+```
+
+The new boxplot of just libraries below percentile 80 is below
+```{r}
+New_POPU_LSA_BoxPlot <- df %>% filter(!(limitMarker %in% c("Up90", "80to90")))
+
+New_POPU_LSA_BoxPlot <- boxplot(New_POPU_LSA_BoxPlot$POPU_LSA)
+
+New_POPU_LSA_BoxPlot
+```
+Another way of looking at it is with a histogram. 
+
+All libraries:
+```{r}
+POPU_LSA_Histogram <- hist(df$POPU_LSA)
+POPU_LSA_Histogram
+```
+
+Only libraries below 80th percentile:  
+```{r}
+New_POPU_LSA_Histogram <- df %>% filter(!(limitMarker %in% c("Up90", "80to90")))
+New_POPU_LSA_Histogram <- hist(New_POPU_LSA_Histogram$POPU_LSA)
+```
+
+
+

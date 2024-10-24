@@ -8,7 +8,6 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-library(LSTbook)
 #if you are running this from your pc, adjust the filepath
 df <- read.csv("C:/Users/lized/Downloads/pls_fy2022_csv/PLS_FY2022 PUD_CSV/PLS_FY22_AE_pud22i.csv")
 ```
@@ -38,7 +37,6 @@ NP–Non-profit Association or Agency
 SD–School District
 OT–Other
   POPU_LSA: Population of the legal service area (population group that the library caters to)
-  HRS_OPEN: Total annual public service hours for all service outlets
 
 **locations & employees**
   CENTLIB: Number of central libraries

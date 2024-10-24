@@ -129,6 +129,29 @@ Only libraries below 80th percentile:
 New_POPU_LSA_Histogram <- df %>% filter(!(limitMarker %in% c("Up90", "80to90")))
 New_POPU_LSA_Histogram <- hist(New_POPU_LSA_Histogram$POPU_LSA)
 ```
+The purpose of this binning is to
+  a. Eliminate outliers that may skew results
+  b. Draw conclusions on libraries that perform with relatively similar business models (the NYC public library is not going to have the same business model as your local library, but your local library may have a similar business model to a library 3 towns away.)
+  
+Also, I chose to bin the states in order to provide another level of categorization.
+```{r}
+df <- df %>%
+  mutate(Region = case_when(
+    STABR %in% c("CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA", "DE", "MD", "DC") ~ "New England & Mid-Atlantic",
+    STABR %in% c("VA", "WV", "KY", "NC", "SC", "GA", "FL", "AL", "MS", "TN") ~ "Southeast",
+    STABR %in% c("OH", "MI", "IN", "IL", "WI", "MN") ~ "Great Lakes",
+    STABR %in% c("IA", "MO", "ND", "SD", "NE", "KS") ~ "Midwest & Plains",
+    STABR %in% c("TX", "OK", "AR", "LA", "NM", "AZ") ~ "Southwest",
+    STABR %in% c("CA", "NV", "OR", "WA", "ID", "UT", "CO", "MT", "WY", "AK", "HI") ~ "West",
+    TRUE ~ "Other"
+  ))
+```
 
+```{r}
+State_boxplot <- boxplot(df$EBOOK ~ df$Region)
+```
+
+
+## Trends
 
 

@@ -8,9 +8,10 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(LSTbook)
+#if you are running this from your pc, adjust the filepath
 df <- read.csv("C:/Users/lized/Downloads/pls_fy2022_csv/PLS_FY2022 PUD_CSV/PLS_FY22_AE_pud22i.csv")
 ```
-
 ## Quantitative variable summary
 The following results show the summary statistics of all quantitative variables (note: certain variables like zip show summary statistics, but these are not relevant for analysis in this way)
 Number of records(before cleaning) = 9,248
@@ -100,7 +101,7 @@ Ncols: 192 -> 38
 Nrow: 9248 -> 4955
 ```{r cleaningdata}
 ourdfcleaned <- ourdf %>%
-  filter(!if_any(everything(), ~ . %in% c(-1, -3, -9)))
+  filter(if_all(everything(), ~ !(. %in% c(-1, -3, -9))))
 ```
 
 ## Identifying problem columns
@@ -120,7 +121,7 @@ for (i in 1:ncol(ourdf)) {
 
 columnslevelofdifficulty <- data.frame(Column = colnames(ourdf), Count = counts)
 columnslevelofdifficulty <- columnslevelofdifficulty %>% arrange(desc(Count))
-head(columnslevelofdifficulty)
+head(columnslevelofdifficulty, n=12)
 ```
 
 ## Remaking a cleaned dataframe
@@ -135,3 +136,9 @@ ourdf2 <- ourdf %>% select(-c(K0_5PRO, K6_11PRO, YAPRO, ADULTPRO, TOTATTEN, WEBV
 ourdfcleaned2 <- ourdf2 %>%
   filter(!if_any(everything(), ~ . %in% c(-1, -3, -9)))
 ```
+
+## Exporting as CSV
+```{r}
+write.csv(ourdfcleaned2,"CleanedDf.csv")
+```
+
